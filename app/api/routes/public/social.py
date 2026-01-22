@@ -15,6 +15,21 @@ router = APIRouter(prefix="/public", tags=["Public Social"])
 
 
 # Likes
+@router.get("/content/{content_id}/like/status")
+def get_like_status(
+    content_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_active_user)]
+) -> dict:
+    """Check if current user liked the content."""
+    existing_like = db.query(Like).filter(
+        Like.user_id == current_user.id,
+        Like.content_id == content_id
+    ).first()
+    
+    return {"liked": existing_like is not None}
+
+
 @router.post("/content/{content_id}/like", status_code=status.HTTP_201_CREATED)
 def like_content(
     content_id: int,

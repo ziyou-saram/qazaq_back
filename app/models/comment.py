@@ -58,7 +58,7 @@ class Comment(Base):
     
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="comments")
-    content: Mapped["Content"] = relationship("Content", back_populates="comments")
+    content_item: Mapped["Content"] = relationship("Content", back_populates="comments")
     
     parent: Mapped["Comment | None"] = relationship(
         "Comment",

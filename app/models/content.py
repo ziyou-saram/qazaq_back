@@ -115,7 +115,7 @@ class Content(Base):
     )
     comments: Mapped[list["Comment"]] = relationship(
         "Comment",
-        back_populates="content",
+        back_populates="content_item",
         cascade="all, delete-orphan"
     )
     likes: Mapped[list["Like"]] = relationship(
