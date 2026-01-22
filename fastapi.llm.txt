@@ -1,0 +1,135 @@
+# FastAPI LLM Context
+
+This file contains FastAPI patterns and best practices specific to the Qazaq Platform backend.
+
+## Project Structure
+
+```
+backend/
+├── app/
+│   ├── api/              # API routes and dependencies
+│   ├── core/             # Core utilities (config, security, storage)
+│   ├── db/               # Database configuration
+│   ├── models/           # SQLAlchemy models
+│   ├── schemas/          # Pydantic schemas
+│   ├── utils/            # Utility functions
+│   └── main.py           # FastAPI application
+├── alembic/              # Database migrations
+└── tests/                # Test files
+```
+
+## Key Patterns
+
+### 1. Dependency Injection
+
+Always use `Annotated` for dependencies:
+
+```python
+from typing import Annotated
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+def my_endpoint(
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
+    pass
+```
+
+### 2. Role-Based Access Control
+
+Use pre-defined role dependencies:
+
+```python
+from app.api.deps import RequireEditor, RequireAdmin
+
+@router.get("/editor-only")
+def editor_endpoint(current_user: Annotated[User, RequireEditor]):
+    pass
+```
+
+### 3. Pydantic v2 Schemas
+
+Always use `model_validate` for ORM conversion:
+
+```python
+from pydantic import BaseModel, ConfigDict
+
+class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    id: int
+    username: str
+```
+
+### 4. Database Models
+
+Use SQLAlchemy 2.0 style with `Mapped`:
+
+```python
+from sqlalchemy.orm import Mapped, mapped_column
+
+class User(Base):
+    __tablename__ = "users"
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(String(50), unique=True)
+```
+
+### 5. Error Handling
+
+Always use HTTPException with proper status codes:
+
+```python
+from fastapi import HTTPException, status
+
+if not user:
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="User not found"
+    )
+```
+
+### 6. Content Workflow
+
+The content workflow is:
+1. DRAFT - Editor creates
+2. IN_REVIEW - Editor submits
+3. NEEDS_REVISION - Chief editor requests changes
+4. APPROVED - Chief editor approves
+5. PUBLISHED - Publishing editor publishes
+
+### 7. Storage Service
+
+Use the storage service for file uploads:
+
+```python
+from app.core.storage import storage_service
+
+filename, file_path = await storage_service.save_upload(file)
+```
+
+The storage service supports both local and S3 storage.
+
+## Authentication
+
+- JWT tokens with access (30 min) and refresh (7 days) tokens
+- Access token for API requests
+- Refresh token to get new access token
+- Tokens include user ID in `sub` claim
+
+## Database
+
+- PostgreSQL as primary database
+- Alembic for migrations
+- All timestamps in UTC
+- Soft delete for comments (is_deleted flag)
+
+## API Conventions
+
+- Use plural nouns for collections: `/users`, `/articles`
+- Use HTTP methods correctly: GET, POST, PUT, DELETE
+- Return 201 for created resources
+- Return 204 for successful deletes
+- Use query parameters for filtering and pagination
+- Use path parameters for resource IDs
