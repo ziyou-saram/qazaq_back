@@ -123,7 +123,7 @@ AWS_REGION=eu-north-1
 PROJECT_NAME=Qazaq Platform
 VERSION=1.0.0
 ENVIRONMENT=production
-UPLOAD_DIR=/var/www/vhosts/yourdomain.com/api.yourdomain.com/uploads
+UPLOAD_DIR=/var/www/vhosts/qazaq.kz/api.qazaq.kz/uploads
 ```
 
 Сохраните файл (Ctrl+X, Y, Enter)

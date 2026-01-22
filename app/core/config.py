@@ -1,3 +1,4 @@
+import json
 from typing import Annotated
 from pydantic import AnyHttpUrl, PostgresDsn, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -29,14 +30,17 @@ class Settings(BaseSettings):
     
     # CORS
     BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = []
+    BACKEND_CORS_ALLOW_ALL: bool = False
     
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: str | list[str]) -> list[str] | str:
         """Parse CORS origins from string or list."""
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
+        if isinstance(v, str):
+            if v.startswith("["):
+                return json.loads(v)
+            return [i.strip() for i in v.split(",") if i.strip()]
+        if isinstance(v, list):
             return v
         raise ValueError(v)
     

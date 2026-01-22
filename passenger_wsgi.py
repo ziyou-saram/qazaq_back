@@ -2,8 +2,8 @@ import sys
 import os
 
 # ВАЖНО: Измените путь на ваш реальный путь на сервере
-INTERP = "/var/www/vhosts/yourdomain.com/api.yourdomain.com/venv/bin/python3"
-PROJECT_PATH = "/var/www/vhosts/yourdomain.com/api.yourdomain.com"
+INTERP = "/var/www/vhosts/qazaq.kz/api.qazaq.kz/venv/bin/python3"
+PROJECT_PATH = "/var/www/vhosts/qazaq.kz/api.qazaq.kz"
 
 # Переключаемся на интерпретатор из venv
 if sys.executable != INTERP:
