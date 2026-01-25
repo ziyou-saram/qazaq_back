@@ -62,7 +62,7 @@ def root():
     return {
         "message": f"Welcome to {settings.PROJECT_NAME} API",
         "version": settings.VERSION,
-        "docs": "/docs",
+        "docs": "/docs", # OpenAPI docs
         "redoc": "/redoc"
     }
 

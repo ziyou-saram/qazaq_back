@@ -90,6 +90,52 @@ def get_approved_queue(
     }
 
 
+@router.get("/content/{content_id}", response_model=ContentResponse)
+def get_publishing_content(
+    content_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, RequirePublishingEditor]
+) -> Content:
+    """Get approved content details for publishing.
+    
+    Args:
+        content_id: Content ID
+        db: Database session
+        current_user: Current authenticated publishing editor
+        
+    Returns:
+        Content details
+        
+    Raises:
+        HTTPException: If content not found
+    """
+    content = db.query(Content).filter(
+        Content.id == content_id
+    ).options(
+        joinedload(Content.author)
+    ).first()
+    
+    if not content:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Content not found"
+        )
+    
+    # Allow viewing if approved OR published
+    if content.status not in [ContentStatus.APPROVED, ContentStatus.PUBLISHED]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Content is not accessible for publishing editor"
+        )
+    
+    # Add computed fields
+    content_dict = ContentResponse.model_validate(content).model_dump()
+    content_dict["likes_count"] = len(content.likes)
+    content_dict["comments_count"] = len([c for c in content.comments if not c.is_deleted])
+    
+    return ContentResponse(**content_dict)
+
+
 @router.post("/content/{content_id}/publish")
 def publish_content(
     content_id: int,

@@ -227,11 +227,11 @@ def update_content(
             detail="Content not found"
         )
     
-    # Can only edit draft or needs_revision content
-    if content.status not in [ContentStatus.DRAFT, ContentStatus.NEEDS_REVISION]:
+    # Allow editing draft, needs_revision, approved, and published content
+    if content.status in [ContentStatus.IN_REVIEW]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Can only edit draft or content needing revision"
+            detail="Cannot edit content while it is in review"
         )
     
     # Update fields

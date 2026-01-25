@@ -13,7 +13,7 @@ from app.core.security import (
     verify_password,
 )
 from app.db.base import get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.user import (
     Token,
     TokenRefresh,
@@ -57,13 +57,21 @@ def register(
             detail="Email already registered"
         )
     
+    role = user_data.role or UserRole.USER
+    if role == UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Admin role cannot be assigned during registration"
+        )
+
     # Create user
     user = User(
         username=user_data.username,
         email=user_data.email,
         first_name=user_data.first_name,
         last_name=user_data.last_name,
-        hashed_password=get_password_hash(user_data.password)
+        hashed_password=get_password_hash(user_data.password),
+        role=role
     )
     
     db.add(user)

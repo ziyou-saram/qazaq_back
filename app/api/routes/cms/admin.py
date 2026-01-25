@@ -154,3 +154,73 @@ def update_user_status(
     
     status_text = "activated" if status_data.is_active else "deactivated"
     return {"message": f"User {status_text} successfully"}
+
+
+@router.get("/content", response_model=dict)
+def get_all_content(
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, RequireAdmin],
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100)
+) -> dict:
+    """Get all content items (admin view).
+    
+    Args:
+        db: Database session
+        current_user: Current authenticated admin
+        skip: Number of items to skip
+        limit: Maximum number of items to return
+        
+    Returns:
+        Paginated list of content with minimal details
+    """
+    from app.models.content import Content
+    from app.schemas.content import ContentListItem
+    
+    query = db.query(Content).order_by(Content.created_at.desc())
+    items, total = paginate_query(query, skip, limit)
+    
+    # Convert to ContentListItem manually or via model_validate if schema matches
+    content_responses = [ContentListItem.model_validate(item) for item in items]
+    
+    return {
+        "items": content_responses,
+        "total": total,
+        "skip": skip,
+        "limit": limit
+    }
+
+
+@router.delete("/content/{content_id}")
+def delete_content(
+    content_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, RequireAdmin]
+) -> dict:
+    """Delete content item (hard delete).
+    
+    Args:
+        content_id: Content ID
+        db: Database session
+        current_user: Current authenticated admin
+        
+    Returns:
+        Success message
+        
+    Raises:
+        HTTPException: If content not found
+    """
+    from app.models.content import Content
+    
+    content = db.query(Content).filter(Content.id == content_id).first()
+    
+    if not content:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Content not found"
+        )
+    
+    db.delete(content)
+    db.commit()
+    
+    return {"message": "Content deleted successfully"}
