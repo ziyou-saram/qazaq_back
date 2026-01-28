@@ -161,9 +161,15 @@ class StorageService:
         elif self.storage_type == "s3" and settings.is_s3_configured:
             file_path = await self.save_file_s3(file, filename)
         else:
+            missing = []
+            if not settings.STORAGE_TYPE == "s3": missing.append("STORAGE_TYPE!=s3")
+            if not settings.AWS_ACCESS_KEY_ID: missing.append("AWS_ACCESS_KEY_ID")
+            if not settings.AWS_SECRET_ACCESS_KEY: missing.append("AWS_SECRET_ACCESS_KEY")
+            if not settings.S3_BUCKET_NAME: missing.append("S3_BUCKET_NAME")
+            
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Storage not properly configured"
+                detail=f"Storage config error. Missing: {', '.join(missing)}"
             )
         
         return filename, file_path
