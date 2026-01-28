@@ -47,6 +47,8 @@ app.include_router(social.router)
 
 # Media
 app.include_router(media.router)
+from fastapi.staticfiles import StaticFiles
+app.mount("/media", StaticFiles(directory=settings.UPLOAD_DIR), name="media")
 
 # CMS routes
 app.include_router(editor.router)

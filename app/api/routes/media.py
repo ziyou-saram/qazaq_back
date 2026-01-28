@@ -65,28 +65,4 @@ async def upload_media(
     }
 
 
-@router.get("/{filename}")
-async def get_media(filename: str):
-    """Serve uploaded media file.
-    
-    Args:
-        filename: Filename to serve
-        
-    Returns:
-        File response
-        
-    Raises:
-        HTTPException: If file not found
-    """
-    from pathlib import Path
-    from app.core.config import settings
-    
-    file_path = Path(settings.UPLOAD_DIR) / filename
-    
-    if not file_path.exists():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="File not found"
-        )
-    
-    return FileResponse(file_path)
+# Media serving is handled by StaticFiles in main.py
