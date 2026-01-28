@@ -16,6 +16,9 @@ async def lifespan(app: FastAPI):
     print(f"Starting {settings.PROJECT_NAME} v{settings.VERSION}")
     print(f"S3 Configured: {settings.is_s3_configured}")
     print(f"Storage Type: {settings.STORAGE_TYPE}")
+    print(f"AWS Key Present: {bool(settings.AWS_ACCESS_KEY_ID)}")
+    print(f"AWS Secret Present: {bool(settings.AWS_SECRET_ACCESS_KEY)}")
+    print(f"Bucket: {settings.S3_BUCKET_NAME}")
     yield
     # Shutdown
     print("Shutting down...")
