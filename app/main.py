@@ -14,6 +14,8 @@ async def lifespan(app: FastAPI):
     """Application lifespan events."""
     # Startup
     print(f"Starting {settings.PROJECT_NAME} v{settings.VERSION}")
+    print(f"S3 Configured: {settings.is_s3_configured}")
+    print(f"Storage Type: {settings.STORAGE_TYPE}")
     yield
     # Shutdown
     print("Shutting down...")
