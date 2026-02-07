@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_active_user
 from app.core.storage import storage_service
+from app.core.config import settings
 from app.db.base import get_db
 from app.models.media import Media
 from app.models.user import User
@@ -49,8 +50,11 @@ async def upload_media(
     db.commit()
     db.refresh(media)
     
-    # Generate URL
-    url = f"/media/{filename}"
+    # For S3 keep the absolute URL, for local keep the static media route.
+    if settings.STORAGE_TYPE == "s3":
+        url = file_path
+    else:
+        url = f"/media/{filename}"
     
     # Manually construct response with all fields
     return {
