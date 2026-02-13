@@ -54,7 +54,7 @@ def get_categories(
 def create_category(
     category_data: CategoryCreate,
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, RequireAdmin],
+    current_user: Annotated[User, RequireEditor],
 ) -> Category:
     """Create new category (Admin only).
 
@@ -126,7 +126,7 @@ def update_category(
     category_id: int,
     category_data: CategoryUpdate,
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, RequireAdmin],
+    current_user: Annotated[User, RequireEditor],
 ) -> Category:
     """Update category (Admin only).
 
@@ -165,7 +165,7 @@ def update_category(
 def delete_category(
     category_id: int,
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, RequireAdmin],
+    current_user: Annotated[User, RequireEditor],
 ) -> dict:
     """Delete category (Admin only).
 
