@@ -6,32 +6,34 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
-    
+
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=True,
-        extra="ignore"
+        env_file=".env", env_file_encoding="utf-8", case_sensitive=True, extra="ignore"
     )
-    
+
     # Project Info
     PROJECT_NAME: str = "Qazaq Platform"
     VERSION: str = "1.0.0"
     DEBUG: bool = False
-    
+
     # Database
     DATABASE_URL: PostgresDsn
-    
+
     # JWT Settings
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    
+
+    # Cookie Settings
+    COOKIE_DOMAIN: str | None = None
+    COOKIE_SECURE: bool = False
+    COOKIE_SAMESITE: str = "lax"
+
     # CORS
     BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = []
     BACKEND_CORS_ALLOW_ALL: bool = False
-    
+
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: str | list[str]) -> list[str] | str:
@@ -43,19 +45,23 @@ class Settings(BaseSettings):
         if isinstance(v, list):
             return v
         raise ValueError(v)
-    
+
     # Upload Settings
     UPLOAD_DIR: str = "uploads"
     MAX_UPLOAD_SIZE: int = 10485760  # 10MB
     ALLOWED_IMAGE_EXTENSIONS: set[str] = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
-    
+
+    # Image Optimization
+    MAX_IMAGE_WIDTH: int = 1920
+    IMAGE_QUALITY: int = 85
+
     # Storage Settings (for future S3 integration)
     STORAGE_TYPE: str = "local"  # "local" or "s3"
     AWS_ACCESS_KEY_ID: str = ""
     AWS_SECRET_ACCESS_KEY: str = ""
     AWS_REGION: str = ""
     S3_BUCKET_NAME: str = ""
-    
+
     @property
     def is_s3_configured(self) -> bool:
         """Check if S3 is properly configured."""

@@ -18,12 +18,14 @@ if TYPE_CHECKING:
 
 class ContentType(str, enum.Enum):
     """Content type enumeration."""
+
     NEWS = "news"
     ARTICLE = "article"
 
 
 class ContentStatus(str, enum.Enum):
     """Content workflow status enumeration."""
+
     DRAFT = "draft"
     IN_REVIEW = "in_review"
     NEEDS_REVISION = "needs_revision"
@@ -33,106 +35,89 @@ class ContentStatus(str, enum.Enum):
 
 class Content(Base):
     """Content model for news and articles."""
-    
+
     __tablename__ = "content"
-    
+
     # Primary fields
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
-    slug: Mapped[str] = mapped_column(String(600), unique=True, index=True, nullable=False)
-    
+    slug: Mapped[str] = mapped_column(
+        String(600), unique=True, index=True, nullable=False
+    )
+
     # Content
     content: Mapped[str] = mapped_column(Text, nullable=False)
     excerpt: Mapped[str | None] = mapped_column(Text, nullable=True)
-    
+
     # Type and status
     type: Mapped[ContentType] = mapped_column(
-        Enum(ContentType, native_enum=False, length=20),
-        nullable=False,
-        index=True
+        Enum(ContentType, native_enum=False, length=20), nullable=False, index=True
     )
     status: Mapped[ContentStatus] = mapped_column(
         Enum(ContentStatus, native_enum=False, length=20),
         default=ContentStatus.DRAFT,
         nullable=False,
-        index=True
+        index=True,
     )
-    
+    is_pinned: Mapped[bool] = mapped_column(default=False, nullable=False, index=True)
+
     # Media
     cover_image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    
+
     # Author
     author_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    
+
     # Category
     category_id: Mapped[int | None] = mapped_column(
-        ForeignKey("categories.id", ondelete="SET NULL"),
-        nullable=True,
-        index=True
+        ForeignKey("categories.id", ondelete="SET NULL"), nullable=True, index=True
     )
-    
+
     # Publishing
     published_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True,
-        index=True
+        DateTime(timezone=True), nullable=True, index=True
     )
     scheduled_publish_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
+        DateTime(timezone=True), nullable=True
     )
-    
+
     # Metrics
     view_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
-        index=True
+        index=True,
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
-        nullable=False
+        nullable=False,
     )
-    
+
     # Relationships
     author: Mapped["User"] = relationship(
-        "User",
-        back_populates="authored_content",
-        foreign_keys=[author_id]
+        "User", back_populates="authored_content", foreign_keys=[author_id]
     )
     category: Mapped["Category | None"] = relationship(
-        "Category",
-        back_populates="content_items"
+        "Category", back_populates="content_items"
     )
     comments: Mapped[list["Comment"]] = relationship(
-        "Comment",
-        back_populates="content_item",
-        cascade="all, delete-orphan"
+        "Comment", back_populates="content_item", cascade="all, delete-orphan"
     )
     likes: Mapped[list["Like"]] = relationship(
-        "Like",
-        back_populates="content",
-        cascade="all, delete-orphan"
+        "Like", back_populates="content", cascade="all, delete-orphan"
     )
     bookmarks: Mapped[list["Bookmark"]] = relationship(
-        "Bookmark",
-        back_populates="content",
-        cascade="all, delete-orphan"
+        "Bookmark", back_populates="content", cascade="all, delete-orphan"
     )
     revisions: Mapped[list["Revision"]] = relationship(
-        "Revision",
-        back_populates="content",
-        cascade="all, delete-orphan"
+        "Revision", back_populates="content", cascade="all, delete-orphan"
     )
-    
+
     def __repr__(self) -> str:
         return f"<Content(id={self.id}, title='{self.title}', type='{self.type}', status='{self.status}')>"

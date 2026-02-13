@@ -2,10 +2,18 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import auth, media
 from app.api.routes.public import comments, content, social
-from app.api.routes.cms import admin, chief_editor, editor, moderator, publishing_editor
+from app.api.routes.cms import (
+    admin,
+    categories,
+    chief_editor,
+    editor,
+    moderator,
+    publishing_editor,
+)
 from app.core.config import settings
 
 
@@ -29,13 +37,15 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     description="Backend API for Qazaq news and article publishing platform",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if settings.BACKEND_CORS_ALLOW_ALL else [str(origin).rstrip("/") for origin in settings.BACKEND_CORS_ORIGINS],
+    allow_origins=["*"]
+    if settings.BACKEND_CORS_ALLOW_ALL
+    else [str(origin).rstrip("/") for origin in settings.BACKEND_CORS_ORIGINS],
     allow_credentials=False if settings.BACKEND_CORS_ALLOW_ALL else True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -50,9 +60,10 @@ app.include_router(content.router)
 app.include_router(comments.router)
 app.include_router(social.router)
 
+
 # Media
 app.include_router(media.router)
-from fastapi.staticfiles import StaticFiles
+
 app.mount("/media", StaticFiles(directory=settings.UPLOAD_DIR), name="media")
 
 # CMS routes
@@ -61,6 +72,7 @@ app.include_router(chief_editor.router)
 app.include_router(publishing_editor.router)
 app.include_router(moderator.router)
 app.include_router(admin.router)
+app.include_router(categories.router)
 
 
 @app.get("/")
@@ -69,8 +81,8 @@ def root():
     return {
         "message": f"Welcome to {settings.PROJECT_NAME} API",
         "version": settings.VERSION,
-        "docs": "/docs", # OpenAPI docs
-        "redoc": "/redoc"
+        "docs": "/docs",  # OpenAPI docs
+        "redoc": "/redoc",
     }
 
 
