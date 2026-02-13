@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.api.deps import RequireAdmin, RequireEditor, get_db
+from app.api.deps import RequireCategoryManagement, get_db
 from app.models.category import Category
 from app.models.user import User
 from app.utils.slug import generate_unique_slug
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/cms/categories", tags=["CMS - Categories"])
 @router.get("", response_model=CategoryList)
 def get_categories(
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, RequireEditor],
+    current_user: Annotated[User, RequireCategoryManagement],
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
 ) -> dict:
@@ -54,7 +54,7 @@ def get_categories(
 def create_category(
     category_data: CategoryCreate,
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, RequireEditor],
+    current_user: Annotated[User, RequireCategoryManagement],
 ) -> Category:
     """Create new category (Admin only).
 
@@ -99,7 +99,7 @@ def create_category(
 def get_category(
     category_id: int,
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, RequireEditor],
+    current_user: Annotated[User, RequireCategoryManagement],
 ) -> Category:
     """Get category details.
 
@@ -126,7 +126,7 @@ def update_category(
     category_id: int,
     category_data: CategoryUpdate,
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, RequireEditor],
+    current_user: Annotated[User, RequireCategoryManagement],
 ) -> Category:
     """Update category (Admin only).
 
@@ -165,7 +165,7 @@ def update_category(
 def delete_category(
     category_id: int,
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, RequireEditor],
+    current_user: Annotated[User, RequireCategoryManagement],
 ) -> dict:
     """Delete category (Admin only).
 

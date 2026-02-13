@@ -251,3 +251,13 @@ RequireAdmin = Depends(require_role(UserRole.ADMIN))
 RequirePublisherOrChief = Depends(
     require_role(UserRole.PUBLISHING_EDITOR, UserRole.CHIEF_EDITOR, UserRole.ADMIN)
 )
+
+RequireCategoryManagement = Depends(
+    require_role(
+        UserRole.EDITOR,
+        UserRole.CHIEF_EDITOR,
+        UserRole.PUBLISHING_EDITOR,
+        UserRole.MODERATOR,
+        UserRole.ADMIN,
+    )
+)
